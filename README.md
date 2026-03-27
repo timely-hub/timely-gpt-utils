@@ -23,8 +23,8 @@ npm install
 ### 특정 브랜치 또는 태그 지정
 
 ```json
-"timely-gpt-utils": "git+ssh://git@github.com:timely-hub/timely-gpt-utils.git#main"
-"timely-gpt-utils": "git+ssh://git@github.com:timely-hub/timely-gpt-utils.git#v1.0.0"
+"timely-gpt-utils": "git+ssh://git@github.com:timely-hub/timely-gpt-utils.git#master"
+"timely-gpt-utils": "git+ssh://git@github.com:timely-hub/timely-gpt-utils.git#v0.0.1"
 ```
 
 ## 사용법
