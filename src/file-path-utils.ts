@@ -1,6 +1,13 @@
 import { decode } from "jsonwebtoken";
 import { ulid } from "ulid";
 
+export type FileServiceRequest = {
+  container: ContainerType;
+  file: FileInfo;
+  filePath: string;
+  subjects: [string, string][];
+  purpose: string;
+};
 export type DecodedPayload = {
   sub: string; // user_id
   rl?: string; // role
@@ -200,13 +207,7 @@ export const buildUploadInfo = ({
   container?: "protected" | "public" | "temp";
   subjects?: [string, string][];
   purpose?: string;
-}): {
-  container: ContainerType;
-  file: FileInfo;
-  filePath: string;
-  subjects: [string, string][];
-  purpose: string;
-} => {
+}): FileServiceRequest => {
   const verifiedUser = convertToken(token);
   let filePath = "";
   let targetValues: TargetType = {
