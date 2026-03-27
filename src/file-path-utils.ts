@@ -128,6 +128,70 @@ export const convertTarget = (
   return `${container}/${paths}${ulid()}${extension}`;
 };
 
+export const deleteTarget = (
+  container: ContainerType,
+  target: Omit<TargetType, "purpose">,
+): string => {
+  if (!CONTAINERS.includes(container)) {
+    throw new Error("Invalid container");
+  }
+  const FILE_NAME_KEYS = new Set(["purpose"]);
+  const paths = Object.entries(prefixMap)
+    .map(([key, value]) => {
+      let targetValue = target[key as keyof Omit<TargetType, "purpose">];
+      if (targetValue) {
+        const isFileNameKey = FILE_NAME_KEYS.has(key);
+        let delimiter = isFileNameKey
+          ? FILE_NAME_DELIMETER
+          : DIRECTORY_DELIMETER;
+        const lastSplit = isFileNameKey ? "_" : "/";
+
+        if (Array.isArray(targetValue)) {
+          if (targetValue.length === 0) {
+            return "";
+          }
+          targetValue = targetValue
+            .map(([name, id]) => `${value}_${name}${DIRECTORY_DELIMETER}${id}`)
+            .join("/");
+          value = "";
+          delimiter = "";
+        }
+
+        return `${value}${delimiter}${targetValue}${lastSplit}`;
+      }
+      return "";
+    })
+    .filter(Boolean)
+    .join("");
+  return `${container}/${paths}`;
+};
+
+export const deleteTargetByPathType = (
+  container: ContainerType,
+  target: Omit<TargetType, "purpose">,
+  pathType: PathType,
+): string => {
+  if (!pathType) {
+    throw new Error("pathType is required");
+  }
+  let targetValues: TargetType = {
+    orgScope: target.orgScope,
+  };
+  switch (pathType) {
+    case "org/space/user":
+      targetValues.spaceId = target.spaceId;
+      targetValues.userId = target.userId;
+      return deleteTarget(container, targetValues);
+    case "org/space":
+      targetValues.spaceId = target.spaceId;
+      return deleteTarget(container, targetValues);
+    case "org/user":
+      targetValues.userId = target.userId;
+      return deleteTarget(container, targetValues);
+    default:
+      throw new Error("Invalid path type");
+  }
+};
 export const revertFilePath = (
   filePath: string,
 ): { container: ContainerType; target: TargetType; fileName: string } => {
