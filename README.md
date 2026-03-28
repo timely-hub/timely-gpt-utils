@@ -1,5 +1,8 @@
 # timely-gpt-utils
 
+version: 0.0.3
+updated: 2026.03.29 06:50
+
 Timely GPT 프로젝트에서 공통으로 사용하는 유틸리티 패키지입니다.
 
 ## 설치
@@ -81,7 +84,14 @@ npm run build
 
 ### download
 
-- file id를 이용하여 파일서버의 API를 통해 presigned url을 받아야 함
+단일파일: file id를 이용하여 파일서버의 API를 통해 presigned url을 받아야 함
+
+폴더(delete와 비슷함):
+
+```typescript
+type ContainerType;
+Omit<TargetType, "purpose">;
+```
 
 ### delete
 
