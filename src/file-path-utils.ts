@@ -68,8 +68,8 @@ export type TargetType = {
   spaceId?: string; // 2 - 스페이스 범위
   userId?: string; // 3 - 유저 범위
   subjects?: [string, string][]; // 4 - 주제 범위 - [[주제명, 주제id]]
-  spaceMemberId?: string; // 5.1 - 스페이스 멤버 범위 - 파일 이름에 포함됨
-  purpose?: string; // 5.2 - 용도 - CHAT, CONVERSATION, NOTE, etc. - 파일 이름에 포함됨
+  spaceMemberId?: string; // 5 - 스페이스 멤버 범위
+  purpose?: string; // 6 - 용도 - CHAT, CONVERSATION, NOTE, etc. - 파일 이름에 포함됨
 };
 
 export const prefixMap = {
@@ -83,7 +83,14 @@ export const prefixMap = {
 export const DIRECTORY_DELIMETER = "@";
 export const FILE_NAME_DELIMETER = "_";
 
-export const convertTarget = (
+/**
+ * metaData를 이용하여 특정 파일 경로를 반환함.
+ * @param container - 컨테이너 타입
+ * @param target - 타겟 타입
+ * @param extension - 파일 확장자
+ * @returns 파일 경로
+ */
+export const combineFilePath = (
   container: ContainerType,
   target: TargetType,
   extension: `.${string}` | string,
@@ -128,7 +135,13 @@ export const convertTarget = (
   return `${container}/${paths}${ulid()}${extension}`;
 };
 
-export const deleteTarget = (
+/**
+ * metaData를 이용하여 특정 폴더 경로를 반환함.
+ * @param container - 컨테이너 타입
+ * @param target - 타겟 타입
+ * @returns 폴더 경로
+ */
+export const combineFolderPath = (
   container: ContainerType,
   target: Omit<TargetType, "purpose">,
 ): string => {
@@ -166,32 +179,6 @@ export const deleteTarget = (
   return `${container}/${paths}`;
 };
 
-export const deleteTargetByPathType = (
-  container: ContainerType,
-  target: Omit<TargetType, "purpose">,
-  pathType: PathType,
-): string => {
-  if (!pathType) {
-    throw new Error("pathType is required");
-  }
-  let targetValues: TargetType = {
-    orgScope: target.orgScope,
-  };
-  switch (pathType) {
-    case "org/space/user":
-      targetValues.spaceId = target.spaceId;
-      targetValues.userId = target.userId;
-      return deleteTarget(container, targetValues);
-    case "org/space":
-      targetValues.spaceId = target.spaceId;
-      return deleteTarget(container, targetValues);
-    case "org/user":
-      targetValues.userId = target.userId;
-      return deleteTarget(container, targetValues);
-    default:
-      throw new Error("Invalid path type");
-  }
-};
 export const revertFilePath = (
   filePath: string,
 ): { container: ContainerType; target: TargetType; fileName: string } => {
@@ -295,7 +282,7 @@ export const buildUploadInfo = ({
       throw new Error("Invalid path type");
   }
   const extension = file.name.split(".").pop() || "";
-  filePath = convertTarget(container, targetValues, extension);
+  filePath = combineFilePath(container, targetValues, extension);
   const lastPath = filePath.split("/").pop() || "";
 
   const fileInfo: FileInfo = {

@@ -68,3 +68,7 @@ npm run build
 ```
 
 빌드 결과물은 `dist/`에 생성됩니다. 레포 설치 시 `prepare` 스크립트가 자동으로 실행됩니다.
+
+## process
+
+frontend 에서 buildUploadInfo()
