@@ -71,4 +71,31 @@ npm run build
 
 ## process
 
-frontend 에서 buildUploadInfo()
+### upload
+
+1. frontend 에서 buildUploadInfo() 실행
+
+2. 실행하여 나온 결과값을 파일서버의 get presigned upload API의 request body로 사용
+
+3. 받은 presigned url로 파일을 업로드(PUT)
+
+### download
+
+- file id를 이용하여 파일서버의 API를 통해 presigned url을 받아야 함
+
+### delete
+
+특정 경로의 파일들을 삭제할 경우, 다음 값을 파일서버에 요청하기 전에 준비해야함
+
+```typescript
+type ContainerType;
+Omit<TargetType, "purpose">;
+```
+
+특정 파일만 삭제할 경우, 다음 값을 파일서버에 요청하기 전에 준비해야함
+
+```typescript
+type ContainerType;
+type TargetType;
+extension: string; # .txt, .png 등
+```
