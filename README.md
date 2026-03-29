@@ -1,6 +1,6 @@
 # timely-gpt-utils
 
-version: 0.0.3
+version: 0.0.4
 updated: 2026.03.29 06:50
 
 Timely GPT 프로젝트에서 공통으로 사용하는 유틸리티 패키지입니다.
