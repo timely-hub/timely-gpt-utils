@@ -200,7 +200,7 @@ export const buildUploadInfo = ({
   subjects = [], // [['chat', 'xxxx-id']]
   purpose = "CHAT",
 }: {
-  file: File;
+  file: Pick<File, "name" | "type" | "size">;
   token: string;
   pathType: PathType;
   container?: "protected" | "public" | "temp";
