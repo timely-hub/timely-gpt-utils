@@ -72,6 +72,24 @@ npm run build
 
 빌드 결과물은 `dist/`에 생성됩니다. 레포 설치 시 `prepare` 스크립트가 자동으로 실행됩니다.
 
+## 배포
+
+1. `package.json`의 `version` 을 올린다
+2. 변경사항 커밋
+3. 태그 생성 및 푸시 (스크립트 사용):
+
+```bash
+./release.sh v0.0.5
+```
+
+4. 사용하는 레포의 `package.json`에서 태그 버전을 업데이트한다:
+
+```json
+"timely-gpt-utils": "git+ssh://git@github.com:timely-hub/timely-gpt-utils.git#v0.0.5"
+```
+
+> 태그는 반드시 `package.json` version 수정 커밋 이후에 생성해야 합니다.
+
 ## process
 
 ### upload
