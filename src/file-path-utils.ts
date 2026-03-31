@@ -12,6 +12,7 @@ import {
   PathType,
   FileServiceRequest,
   FileInfo,
+  SUBJECT_KEY_PREFIX_REGEX,
 } from "./types";
 
 export const convertToken = (token: string): VerifiedUser => {
@@ -31,6 +32,14 @@ export const convertToken = (token: string): VerifiedUser => {
   };
   return verifiedUser;
 };
+const validateSubjectKeys = (subjects: [string, string][]) => {
+  for (const [key] of subjects) {
+    if (!SUBJECT_KEY_PREFIX_REGEX.test(key)) {
+      throw new Error(`Invalid subject key: "${key}". Only lowercase letters and underscores are allowed.`);
+    }
+  }
+};
+
 /**
  * metaData를 이용하여 특정 파일 경로를 반환함.
  * @param container - 컨테이너 타입
@@ -46,6 +55,7 @@ export const combineFilePath = (
   if (!CONTAINERS.includes(container)) {
     throw new Error("Invalid container");
   }
+  if (target.subjects) validateSubjectKeys(target.subjects);
   if (!extension.startsWith(".")) {
     extension = `.${extension}`;
   }
@@ -96,6 +106,7 @@ export const combineFolderPath = (
   if (!CONTAINERS.includes(container)) {
     throw new Error("Invalid container");
   }
+  if (target.subjects) validateSubjectKeys(target.subjects);
   const FILE_NAME_KEYS = new Set(["purpose"]);
   const paths = Object.entries(prefixMap)
     .map(([key, value]) => {
@@ -143,7 +154,7 @@ export const revertFilePath = (
 
   for (const segment of middleParts) {
     if (segment.startsWith("sub_")) {
-      // subjects: sub_name@id
+      // subjects: sub_name-id
       const rest = segment.slice(4);
       const atIdx = rest.indexOf(DIRECTORY_DELIMETER);
       if (atIdx !== -1) {
@@ -171,10 +182,10 @@ export const revertFilePath = (
     const rest = lastPart.slice(firstUnderIdx + 1);
     const key = reversePrefixMap[prefix];
     if (key) {
-      const secondUnderIdx = rest.indexOf(FILE_NAME_DELIMETER);
-      if (secondUnderIdx !== -1) {
-        (target as any)[key] = rest.slice(0, secondUnderIdx);
-        fileName = rest.slice(secondUnderIdx + 1);
+      const lastUnderIdx = rest.lastIndexOf(FILE_NAME_DELIMETER);
+      if (lastUnderIdx !== -1) {
+        (target as any)[key] = rest.slice(0, lastUnderIdx);
+        fileName = rest.slice(lastUnderIdx + 1);
       } else {
         (target as any)[key] = rest;
         fileName = "";
@@ -207,6 +218,7 @@ export const buildUploadInfo = ({
   subjects?: [string, string][];
   purpose?: string;
 }): FileServiceRequest => {
+  validateSubjectKeys(subjects);
   const verifiedUser = convertToken(token);
   let filePath = "";
   let targetValues: TargetType = {
