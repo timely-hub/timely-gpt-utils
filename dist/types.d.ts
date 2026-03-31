@@ -16,8 +16,9 @@ export declare const prefixMap: {
     spaceMemberId: string;
     purpose: string;
 };
-export declare const DIRECTORY_DELIMETER = "@";
+export declare const DIRECTORY_DELIMETER = "-";
 export declare const FILE_NAME_DELIMETER = "_";
+export declare const SUBJECT_KEY_PREFIX_REGEX: RegExp;
 export type FileServiceRequest = {
     container: ContainerType;
     file: FileInfo;
