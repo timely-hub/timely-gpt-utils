@@ -1,6 +1,17 @@
 export const CONTAINERS = ["protected", "public", "temp"] as const;
 export type ContainerType = (typeof CONTAINERS)[number];
 
+export const FILE_CATEGORIES = [
+  "DOCUMENT", // 로더가 별도로 필요한 파일들
+  "IMAGE",
+  "AUDIO",
+  "VIDEO",
+  "TEXT", // 바로 읽을 수 있는 파일들
+  "OTHER", // 분류되지 않은 파일들
+] as const;
+
+export type FileCategoryType = (typeof FILE_CATEGORIES)[number];
+
 export type TargetType = {
   orgScope: string; // 1 - 조직 범위
   spaceId?: string; // 2 - 스페이스 범위
@@ -62,4 +73,5 @@ export type FileInfo = {
   mimeType: string;
   size: number;
   originalName?: string;
+  category: FileCategoryType;
 };

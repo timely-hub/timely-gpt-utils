@@ -14,6 +14,7 @@ import {
   FileInfo,
   SUBJECT_KEY_PREFIX_REGEX,
 } from "./types";
+import { classifyByFile } from "./file-classifier";
 
 export const convertToken = (token: string): VerifiedUser => {
   const decoded = decode(token) as DecodedPayload | null;
@@ -35,7 +36,9 @@ export const convertToken = (token: string): VerifiedUser => {
 const validateSubjectKeys = (subjects: [string, string][]) => {
   for (const [key] of subjects) {
     if (!SUBJECT_KEY_PREFIX_REGEX.test(key)) {
-      throw new Error(`Invalid subject key: "${key}". Only lowercase letters and underscores are allowed.`);
+      throw new Error(
+        `Invalid subject key: "${key}". Only lowercase letters and underscores are allowed.`,
+      );
     }
   }
 };
@@ -244,6 +247,7 @@ export const buildUploadInfo = ({
   const extension = file.name.split(".").pop() || "";
   filePath = combineFilePath(container, targetValues, extension);
   const lastPath = filePath.split("/").pop() || "";
+  const category = classifyByFile(file);
 
   const fileInfo: FileInfo = {
     filename: lastPath,
@@ -251,6 +255,7 @@ export const buildUploadInfo = ({
     mimeType: file.type || "application/octet-stream",
     size: file.size,
     originalName: file.name,
+    category,
   };
 
   return {
