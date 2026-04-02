@@ -13,8 +13,9 @@ import {
   FileServiceRequest,
   FileInfo,
   SUBJECT_KEY_PREFIX_REGEX,
+  FileCategoryType,
 } from "./types";
-import { classifyByFile } from "./file-classifier";
+import { classifyByExtension, classifyByFile } from "./file-classifier";
 
 export const convertToken = (token: string): VerifiedUser => {
   const decoded = decode(token) as DecodedPayload | null;
@@ -143,7 +144,12 @@ export const combineFolderPath = (
 
 export const revertFilePath = (
   filePath: string,
-): { container: ContainerType; target: TargetType; fileName: string } => {
+): {
+  container: ContainerType;
+  target: TargetType;
+  fileName: string;
+  category: FileCategoryType;
+} => {
   const parts = filePath.split("/");
   const container = parts[0] as ContainerType;
   const lastPart = parts[parts.length - 1];
@@ -195,6 +201,10 @@ export const revertFilePath = (
       }
     }
   }
+  let category: FileCategoryType = "OTHER";
+  if (fileName) {
+    category = classifyByExtension(fileName.split(".").pop() || "");
+  }
 
   return {
     container,
@@ -203,6 +213,7 @@ export const revertFilePath = (
       orgScope: target.orgScope || "timely-gpt",
     },
     fileName,
+    category,
   };
 };
 
