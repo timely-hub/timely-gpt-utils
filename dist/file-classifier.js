@@ -1,19 +1,32 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.classifyByFile = exports.classifyByMime = exports.classifyByExtension = void 0;
+const SHEET_MIMES = new Set([
+    // CSV / TSV (text/* 이지만 SHEET로 우선 분류)
+    "text/csv",
+    "text/x-csv",
+    "text/tab-separated-values",
+    // Microsoft Excel
+    "application/vnd.ms-excel",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel.sheet.macroEnabled.12",
+    "application/vnd.ms-excel.sheet.binary.macroEnabled.12",
+    "application/vnd.ms-excel.template",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.template",
+    "application/vnd.ms-excel.template.macroEnabled.12",
+    // ODF Spreadsheet
+    "application/vnd.oasis.opendocument.spreadsheet",
+]);
 // binary 문서 형식 - MIME type만으로는 text/binary 구분이 어려운 것들
 const DOCUMENT_MIMES = new Set([
     // Microsoft Office
     "application/pdf",
     "application/msword",
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    "application/vnd.ms-excel",
-    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "application/vnd.ms-powerpoint",
     "application/vnd.openxmlformats-officedocument.presentationml.presentation",
     // ODF (LibreOffice / OpenOffice)
     "application/vnd.oasis.opendocument.text",
-    "application/vnd.oasis.opendocument.spreadsheet",
     "application/vnd.oasis.opendocument.presentation",
     // 한글과컴퓨터
     "application/haansofthwp",
@@ -34,9 +47,6 @@ const EXTENSION_CATEGORY_MAP = {
     doc: "DOCUMENT",
     docx: "DOCUMENT",
     docm: "DOCUMENT",
-    xls: "DOCUMENT",
-    xlsx: "DOCUMENT",
-    xlsm: "DOCUMENT",
     ppt: "DOCUMENT",
     pptx: "DOCUMENT",
     pptm: "DOCUMENT",
@@ -44,17 +54,28 @@ const EXTENSION_CATEGORY_MAP = {
     hwpx: "DOCUMENT",
     hwpml: "DOCUMENT",
     odt: "DOCUMENT",
-    ods: "DOCUMENT",
     odp: "DOCUMENT",
     pages: "DOCUMENT",
     numbers: "DOCUMENT",
     key: "DOCUMENT",
     rtf: "DOCUMENT",
     epub: "DOCUMENT",
+    // SHEET
+    csv: "SHEET",
+    tsv: "SHEET",
+    xls: "SHEET",
+    xlsx: "SHEET",
+    xlsm: "SHEET",
+    xlsb: "SHEET",
+    xlt: "SHEET",
+    xltx: "SHEET",
+    xltm: "SHEET",
+    ods: "SHEET",
+    parquet: "SHEET",
+    feather: "SHEET",
     // TEXT
     txt: "TEXT",
     md: "TEXT",
-    csv: "TEXT",
     html: "TEXT",
     htm: "TEXT",
     xml: "TEXT",
@@ -103,6 +124,8 @@ const classifyByMime = (mimeType) => {
         return "AUDIO";
     if (type === "video")
         return "VIDEO";
+    if (SHEET_MIMES.has(mimeType))
+        return "SHEET";
     if (type === "text")
         return "TEXT";
     if (DOCUMENT_MIMES.has(mimeType))

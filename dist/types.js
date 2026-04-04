@@ -9,6 +9,7 @@ exports.CONTAINERS = ["protected", "public", "temp"];
 exports.CONTAINERS_SCHEMA = zod_1.default.enum(exports.CONTAINERS);
 exports.FILE_CATEGORIES = [
     "DOCUMENT", // 로더가 별도로 필요한 파일들
+    "SHEET",
     "IMAGE",
     "AUDIO",
     "VIDEO",

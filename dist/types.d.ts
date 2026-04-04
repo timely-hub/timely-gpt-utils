@@ -6,9 +6,10 @@ export declare const CONTAINERS_SCHEMA: z.ZodEnum<{
     temp: "temp";
 }>;
 export type ContainerType = z.infer<typeof CONTAINERS_SCHEMA>;
-export declare const FILE_CATEGORIES: readonly ["DOCUMENT", "IMAGE", "AUDIO", "VIDEO", "TEXT", "OTHER"];
+export declare const FILE_CATEGORIES: readonly ["DOCUMENT", "SHEET", "IMAGE", "AUDIO", "VIDEO", "TEXT", "OTHER"];
 export declare const FILE_CATEGORIES_SCHEMA: z.ZodEnum<{
     DOCUMENT: "DOCUMENT";
+    SHEET: "SHEET";
     IMAGE: "IMAGE";
     AUDIO: "AUDIO";
     VIDEO: "VIDEO";
@@ -24,6 +25,7 @@ export declare const FILE_INFO_SCHEMA: z.ZodObject<{
     originalName: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     category: z.ZodEnum<{
         DOCUMENT: "DOCUMENT";
+        SHEET: "SHEET";
         IMAGE: "IMAGE";
         AUDIO: "AUDIO";
         VIDEO: "VIDEO";
@@ -66,6 +68,7 @@ export declare const FILE_SERVICE_REQUEST_SCHEMA: z.ZodObject<{
         originalName: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         category: z.ZodEnum<{
             DOCUMENT: "DOCUMENT";
+            SHEET: "SHEET";
             IMAGE: "IMAGE";
             AUDIO: "AUDIO";
             VIDEO: "VIDEO";
