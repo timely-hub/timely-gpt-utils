@@ -39,4 +39,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.filePathUtils = void 0;
 exports.filePathUtils = __importStar(require("./file-path-utils"));
 __exportStar(require("./types"), exports);
+__exportStar(require("./file-classifier"), exports);
 //# sourceMappingURL=index.js.map

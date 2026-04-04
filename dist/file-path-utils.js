@@ -4,6 +4,7 @@ exports.getAllSubjectsFromFilePath = exports.getSubjectByNameFromFilePath = expo
 const jsonwebtoken_1 = require("jsonwebtoken");
 const ulid_1 = require("ulid");
 const types_1 = require("./types");
+const file_classifier_1 = require("./file-classifier");
 const convertToken = (token) => {
     const decoded = (0, jsonwebtoken_1.decode)(token);
     if (!decoded) {
@@ -168,6 +169,10 @@ const revertFilePath = (filePath) => {
             }
         }
     }
+    let category = "OTHER";
+    if (fileName) {
+        category = (0, file_classifier_1.classifyByExtension)(fileName.split(".").pop() || "");
+    }
     return {
         container,
         target: {
@@ -175,6 +180,7 @@ const revertFilePath = (filePath) => {
             orgScope: target.orgScope || "timely-gpt",
         },
         fileName,
+        category,
     };
 };
 exports.revertFilePath = revertFilePath;
@@ -206,12 +212,14 @@ purpose = "CHAT", }) => {
     const extension = file.name.split(".").pop() || "";
     filePath = (0, exports.combineFilePath)(container, targetValues, extension);
     const lastPath = filePath.split("/").pop() || "";
+    const category = (0, file_classifier_1.classifyByFile)(file);
     const fileInfo = {
         filename: lastPath,
         extension: file.name.split(".").pop() || "",
         mimeType: file.type || "application/octet-stream",
         size: file.size,
         originalName: file.name,
+        category,
     };
     return {
         container,
