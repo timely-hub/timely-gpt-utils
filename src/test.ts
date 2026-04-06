@@ -32,6 +32,18 @@ export const test = () => {
   const reverted2 = filePathUtils.revertFilePath(test2);
   console.log("reverted2", JSON.stringify(reverted2, null, 2));
 
+  const test3 = filePathUtils.buildUploadInfo({
+    file: {
+      name: "test.txt",
+      type: "text/plain",
+      size: 100,
+    },
+    token:
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZjMyMWRiZS1kMTQ3LTRiNGEtYmI1Yi1jNTc4M2JjZDViZTEiLCJybCI6IlJPTEVfTUFTVEVSIiwic3BhY2VJZCI6IjczMjBlM2NiLWMwNTctNDYyZi1iZDEyLWNmYzU0NzA4NGU3OCIsInNwYWNlTWVtYmVySWQiOiIxIiwic3BhY2VSb2xlIjoiUk9MRV9TUEFDRV9BRE1JTiIsInQiOiJBIiwic2Vzc2lvblNjb3BlZCI6ZmFsc2UsImlhdCI6MTc3NTAwODQ3NiwiZXhwIjoxODA2NTQ0NDc2LCJpc3MiOiJ0aW1lbHlncHQifQ.HBsM0XczYigpZnP0wESrMF7L3pAbP1SeygZWQeT8DXE",
+    pathType: "org/space/user",
+  });
+  console.log("buildUploadInfo", test3);
+
   // const test3 = filePathUtils.combineFilePath(
   //   "protected",
   //   {
