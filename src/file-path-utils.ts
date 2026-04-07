@@ -1,5 +1,21 @@
-import { decode } from "jsonwebtoken";
 import { ulid } from "ulid";
+
+const decodeJwt = (token: string): DecodedPayload | null => {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return null;
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const json =
+      typeof (globalThis as Record<string, unknown>)["atob"] === "function"
+        ? (globalThis as unknown as { atob: (s: string) => string }).atob(
+            base64,
+          )
+        : Buffer.from(base64, "base64").toString("utf-8");
+    return JSON.parse(json);
+  } catch {
+    return null;
+  }
+};
 import {
   VerifiedUser,
   DecodedPayload,
@@ -18,7 +34,7 @@ import {
 import { classifyByExtension, classifyByFile } from "./file-classifier";
 
 export const convertToken = (token: string): VerifiedUser => {
-  const decoded = decode(token) as DecodedPayload | null;
+  const decoded = decodeJwt(token);
   if (!decoded) {
     throw new Error("Invalid token");
   }

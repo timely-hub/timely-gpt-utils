@@ -1,12 +1,26 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseFileUnknownPath = exports.isURL = exports.parseFileServerString = exports.parseFileServerStringByFileId = exports.parseFileServerStringByFilename = exports.VIEW_FILE_API_PATH = exports.DOWNLOAD_FILE_API_PATH = exports.getAllSubjectsFromFilePath = exports.getSubjectByNameFromFilePath = exports.getSubjectByNameFromTarget = exports.getAllSubjectsFromTarget = exports.buildUploadInfo = exports.revertFilePath = exports.combineFolderPath = exports.combineFilePath = exports.convertToken = void 0;
-const jsonwebtoken_1 = require("jsonwebtoken");
 const ulid_1 = require("ulid");
+const decodeJwt = (token) => {
+    try {
+        const payload = token.split(".")[1];
+        if (!payload)
+            return null;
+        const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+        const json = typeof globalThis["atob"] === "function"
+            ? globalThis.atob(base64)
+            : Buffer.from(base64, "base64").toString("utf-8");
+        return JSON.parse(json);
+    }
+    catch {
+        return null;
+    }
+};
 const types_1 = require("./types");
 const file_classifier_1 = require("./file-classifier");
 const convertToken = (token) => {
-    const decoded = (0, jsonwebtoken_1.decode)(token);
+    const decoded = decodeJwt(token);
     if (!decoded) {
         throw new Error("Invalid token");
     }
