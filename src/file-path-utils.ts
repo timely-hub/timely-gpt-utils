@@ -313,3 +313,114 @@ export const getAllSubjectsFromFilePath = (
   const { target } = revertFilePath(filePath);
   return getAllSubjectsFromTarget(target);
 };
+
+export const DOWNLOAD_FILE_API_PATH = "/api/download-file";
+export const VIEW_FILE_API_PATH = "/api/view-file";
+
+export const parseFileServerStringByFilename = (filename: string) => {
+  return `${DOWNLOAD_FILE_API_PATH}?filename=${filename}`;
+};
+export const parseFileServerStringByFileId = (fileId: string) => {
+  return `${DOWNLOAD_FILE_API_PATH}?fileId=${fileId}`;
+};
+export const parseFileServerString = (fileServerString: string) => {
+  // presigned 된 url이거나 일반 url인 경우 그냥 통과
+  if (fileServerString?.startsWith("http")) {
+    return fileServerString;
+  }
+  // file-server: 프로토콜인 경우 파일 이름을 쿼리 파라미터로 추가
+  if (fileServerString?.startsWith("file-server:")) {
+    const fileString = fileServerString.split(":")[1];
+    if (fileString.startsWith("p_")) {
+      return parseFileServerStringByFilename(fileString);
+    }
+    if (fileString.startsWith("/")) {
+      return parseFileServerStringByFileId(fileString);
+    }
+    return parseFileServerStringByFilename(fileString);
+  }
+  if (
+    // 약속된 문자열 형식
+    fileServerString?.startsWith("p_") &&
+    fileServerString?.includes(".")
+  ) {
+    return parseFileServerStringByFilename(fileServerString);
+  }
+  if (
+    // 약한 추론
+    !fileServerString?.includes("/")
+  ) {
+    return parseFileServerStringByFileId(fileServerString);
+  }
+  // 그 밖의 경우는 그냥 통과
+  return fileServerString;
+};
+
+export const isURL = (url: string): URL | null => {
+  try {
+    return new URL(url);
+  } catch (error) {
+    return null;
+  }
+};
+export const parseFileUnknownPath = (
+  unknownPath: string,
+): { fileName: string; id: string } => {
+  let fileName = "";
+  let id = "";
+  const url = isURL(unknownPath);
+  const searchParams = url?.searchParams;
+  const pathname = url?.pathname;
+  const filename = searchParams?.get("filename");
+  const fileId = searchParams?.get("fileId");
+  if (filename) {
+    fileName = filename;
+    return { fileName, id };
+  }
+  if (fileId) {
+    id = fileId;
+    return { fileName, id };
+  }
+  if (url) {
+    const matches = pathname?.match(
+      /^\/timely-file-khdgj\/files\/by\/(name|id)\/([^/]+)/,
+    );
+    if (matches) {
+      // 예시
+      // http://localhost:3500/timely-file-khdgj/files/by/name/p_test_01KN6DBPTP2JQS2N5XPJC30DX9.png
+      // http://localhost:3500/timely-file-khdgj/files/by/id/ae2b8ff8-cbbf-4f4b-9246-8952920dad04
+      const type = matches[1];
+      const value = matches[2];
+      if (type === "name") {
+        fileName = value;
+      }
+      if (type === "id") {
+        id = value;
+      }
+    } else {
+      // 예시
+      // https://tg7stg7storage.blob.core.windows.net/protected/o-timely-gpt/s-7320e3cb-c057-462f-bd12-cfc547084e78/u-af321dbe-d147-4b4a-bb5b-c5783bcd5be1/sub_chatid-test-12/sm-1/p_test_01KN6DBPTP2JQS2N5XPJC30DX9.png
+      fileName = pathname?.split("/").pop() || "";
+    }
+  } else {
+    if (unknownPath.startsWith("/")) {
+      const fileNameArr = unknownPath.split("/").pop()?.split(".");
+      if (
+        fileNameArr &&
+        fileNameArr.length > 1 &&
+        unknownPath.startsWith("p_")
+      ) {
+        const lastFileName = unknownPath.split("/").pop();
+        fileName = lastFileName || "";
+      } else {
+        const lastId = unknownPath.split("/").pop();
+        id = lastId || "";
+      }
+    } else if (unknownPath.startsWith("p_")) {
+      fileName = unknownPath;
+    } else {
+      id = unknownPath;
+    }
+  }
+  return { fileName, id };
+};
