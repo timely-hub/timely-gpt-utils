@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllSubjectsFromFilePath = exports.getSubjectByNameFromFilePath = exports.getSubjectByNameFromTarget = exports.getAllSubjectsFromTarget = exports.buildUploadInfo = exports.revertFilePath = exports.combineFolderPath = exports.combineFilePath = exports.convertToken = void 0;
+exports.parseFileUnknownPath = exports.isURL = exports.parseFileServerString = exports.parseFileServerStringByFileId = exports.parseFileServerStringByFilename = exports.VIEW_FILE_API_PATH = exports.DOWNLOAD_FILE_API_PATH = exports.getAllSubjectsFromFilePath = exports.getSubjectByNameFromFilePath = exports.getSubjectByNameFromTarget = exports.getAllSubjectsFromTarget = exports.buildUploadInfo = exports.revertFilePath = exports.combineFolderPath = exports.combineFilePath = exports.convertToken = void 0;
 const jsonwebtoken_1 = require("jsonwebtoken");
 const ulid_1 = require("ulid");
 const types_1 = require("./types");
@@ -251,4 +251,115 @@ const getAllSubjectsFromFilePath = (filePath) => {
     return (0, exports.getAllSubjectsFromTarget)(target);
 };
 exports.getAllSubjectsFromFilePath = getAllSubjectsFromFilePath;
+exports.DOWNLOAD_FILE_API_PATH = "/api/download-file";
+exports.VIEW_FILE_API_PATH = "/api/view-file";
+const parseFileServerStringByFilename = (filename) => {
+    return `${exports.DOWNLOAD_FILE_API_PATH}?filename=${filename}`;
+};
+exports.parseFileServerStringByFilename = parseFileServerStringByFilename;
+const parseFileServerStringByFileId = (fileId) => {
+    return `${exports.DOWNLOAD_FILE_API_PATH}?fileId=${fileId}`;
+};
+exports.parseFileServerStringByFileId = parseFileServerStringByFileId;
+const parseFileServerString = (fileServerString) => {
+    // presigned 된 url이거나 일반 url인 경우 그냥 통과
+    if (fileServerString?.startsWith("http")) {
+        return fileServerString;
+    }
+    // file-server: 프로토콜인 경우 파일 이름을 쿼리 파라미터로 추가
+    if (fileServerString?.startsWith("file-server:")) {
+        const fileString = fileServerString.split(":")[1];
+        if (fileString.startsWith("p_")) {
+            return (0, exports.parseFileServerStringByFilename)(fileString);
+        }
+        if (fileString.startsWith("/")) {
+            return (0, exports.parseFileServerStringByFileId)(fileString);
+        }
+        return (0, exports.parseFileServerStringByFilename)(fileString);
+    }
+    if (
+    // 약속된 문자열 형식
+    fileServerString?.startsWith("p_") &&
+        fileServerString?.includes(".")) {
+        return (0, exports.parseFileServerStringByFilename)(fileServerString);
+    }
+    if (
+    // 약한 추론
+    !fileServerString?.includes("/")) {
+        return (0, exports.parseFileServerStringByFileId)(fileServerString);
+    }
+    // 그 밖의 경우는 그냥 통과
+    return fileServerString;
+};
+exports.parseFileServerString = parseFileServerString;
+const isURL = (url) => {
+    try {
+        return new URL(url);
+    }
+    catch (error) {
+        return null;
+    }
+};
+exports.isURL = isURL;
+const parseFileUnknownPath = (unknownPath) => {
+    let fileName = "";
+    let id = "";
+    const url = (0, exports.isURL)(unknownPath);
+    const searchParams = url?.searchParams;
+    const pathname = url?.pathname;
+    const filename = searchParams?.get("filename");
+    const fileId = searchParams?.get("fileId");
+    if (filename) {
+        fileName = filename;
+        return { fileName, id };
+    }
+    if (fileId) {
+        id = fileId;
+        return { fileName, id };
+    }
+    if (url) {
+        const matches = pathname?.match(/^\/timely-file-khdgj\/files\/by\/(name|id)\/([^/]+)/);
+        if (matches) {
+            // 예시
+            // http://localhost:3500/timely-file-khdgj/files/by/name/p_test_01KN6DBPTP2JQS2N5XPJC30DX9.png
+            // http://localhost:3500/timely-file-khdgj/files/by/id/ae2b8ff8-cbbf-4f4b-9246-8952920dad04
+            const type = matches[1];
+            const value = matches[2];
+            if (type === "name") {
+                fileName = value;
+            }
+            if (type === "id") {
+                id = value;
+            }
+        }
+        else {
+            // 예시
+            // https://tg7stg7storage.blob.core.windows.net/protected/o-timely-gpt/s-7320e3cb-c057-462f-bd12-cfc547084e78/u-af321dbe-d147-4b4a-bb5b-c5783bcd5be1/sub_chatid-test-12/sm-1/p_test_01KN6DBPTP2JQS2N5XPJC30DX9.png
+            fileName = pathname?.split("/").pop() || "";
+        }
+    }
+    else {
+        if (unknownPath.startsWith("/")) {
+            const fileNameArr = unknownPath.split("/").pop()?.split(".");
+            if (fileNameArr &&
+                fileNameArr.length > 1 &&
+                unknownPath.startsWith("p_")) {
+                const lastFileName = unknownPath.split("/").pop();
+                fileName = lastFileName || "";
+            }
+            else {
+                const lastId = unknownPath.split("/").pop();
+                id = lastId || "";
+            }
+        }
+        else if (unknownPath.startsWith("p_")) {
+            fileName = unknownPath;
+        }
+        else {
+            id = unknownPath;
+        }
+    }
+    return { fileName, id };
+};
+exports.parseFileUnknownPath = parseFileUnknownPath;
 //# sourceMappingURL=file-path-utils.js.map

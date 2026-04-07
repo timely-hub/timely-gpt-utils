@@ -33,4 +33,14 @@ export declare const getAllSubjectsFromTarget: (target: TargetType) => Record<st
 export declare const getSubjectByNameFromTarget: (target: TargetType, name: string) => string | undefined;
 export declare const getSubjectByNameFromFilePath: (filePath: string, name: string) => string | undefined;
 export declare const getAllSubjectsFromFilePath: (filePath: string) => Record<string, string>;
+export declare const DOWNLOAD_FILE_API_PATH = "/api/download-file";
+export declare const VIEW_FILE_API_PATH = "/api/view-file";
+export declare const parseFileServerStringByFilename: (filename: string) => string;
+export declare const parseFileServerStringByFileId: (fileId: string) => string;
+export declare const parseFileServerString: (fileServerString: string) => string;
+export declare const isURL: (url: string) => URL | null;
+export declare const parseFileUnknownPath: (unknownPath: string) => {
+    fileName: string;
+    id: string;
+};
 //# sourceMappingURL=file-path-utils.d.ts.map
