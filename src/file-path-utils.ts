@@ -385,6 +385,15 @@ export const parseFileUnknownPath = (
 ): { fileName: string; id: string } => {
   let fileName = "";
   let id = "";
+  if (unknownPath.startsWith("file-server:")) {
+    unknownPath = unknownPath.split("file-server:")[1];
+    if (unknownPath.startsWith("p_")) {
+      fileName = unknownPath.split("p_")[1];
+    } else {
+      id = unknownPath;
+    }
+    return { fileName, id };
+  }
   const url = isURL(unknownPath);
   const searchParams = url?.searchParams;
   const pathname = url?.pathname;
