@@ -40,7 +40,7 @@ const result = filePathUtils.generateFilePath({
   token,
   pathType: "org/space/user", // org/space/user, org/user, org/space
   container: "protected", // 'protected', 'public', 'temp'
-  subjects: [["group", "01KMPFX22QG0BP6AM8VE1MM0CZ"]], // optional
+  subjects: [["group_id", "01KMPFX22QG0BP6AM8VE1MM0CZ"]], // optional
   purpose: "LABS_AI", // optional, 파일명에 기록
 });
 

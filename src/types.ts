@@ -26,9 +26,17 @@ export const FILE_INFO_SCHEMA = z.object({
 });
 export type FileInfo = z.infer<typeof FILE_INFO_SCHEMA>;
 
+export const SUBJECTS_KEYS = ["chat_id", "storage_id", "group_id"] as const;
+
+export const SUBJECTS_KEYS_SCHEMA = z.enum(SUBJECTS_KEYS);
+
+export type SubjectsKeysType = z.infer<typeof SUBJECTS_KEYS_SCHEMA>;
+
 const SUBJECT_SCHEMA = z
-  .array(z.tuple([z.string(), z.string()]))
-  .transform((arr): [string, string][] => arr as [string, string][]);
+  .array(z.tuple([SUBJECTS_KEYS_SCHEMA, z.string()]))
+  .transform(
+    (arr): [SubjectsKeysType, string][] => arr as [SubjectsKeysType, string][],
+  );
 
 export const TARGET_SCHEMA = z.object({
   orgScope: z.string().describe("1 - 조직 범위"),

@@ -30,6 +30,7 @@ import {
   FileInfo,
   SUBJECT_KEY_PREFIX_REGEX,
   FileCategoryType,
+  SubjectsKeysType,
 } from "./types";
 import { classifyByExtension, classifyByFile } from "./file-classifier";
 
@@ -50,7 +51,7 @@ export const convertToken = (token: string): VerifiedUser => {
   };
   return verifiedUser;
 };
-const validateSubjectKeys = (subjects: [string, string][]) => {
+const validateSubjectKeys = (subjects: [SubjectsKeysType, string][]) => {
   for (const [key] of subjects) {
     if (!SUBJECT_KEY_PREFIX_REGEX.test(key)) {
       throw new Error(
@@ -185,7 +186,7 @@ export const revertFilePath = (
       if (atIdx !== -1) {
         target.subjects = [
           ...(target.subjects || []),
-          [rest.slice(0, atIdx), rest.slice(atIdx + 1)],
+          [rest.slice(0, atIdx) as SubjectsKeysType, rest.slice(atIdx + 1)],
         ];
       }
     } else {
@@ -245,7 +246,7 @@ export const buildUploadInfo = ({
   token: string;
   pathType: PathType;
   container?: "protected" | "public" | "temp";
-  subjects?: [string, string][];
+  subjects?: [SubjectsKeysType, string][];
   purpose?: string;
 }): FileServiceRequest => {
   validateSubjectKeys(subjects);

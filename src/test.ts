@@ -11,7 +11,7 @@ export const test = () => {
     orgScope: "timely-gpt",
     spaceId: "1234567890",
     userId: "1234567890",
-    subjects: [["groupid", "group-id123"]],
+    subjects: [["group_id", "group-id123"]],
     spaceMemberId: "smid_191292",
   });
   console.log("combineFolderPath", test11);
