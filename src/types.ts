@@ -26,7 +26,12 @@ export const FILE_INFO_SCHEMA = z.object({
 });
 export type FileInfo = z.infer<typeof FILE_INFO_SCHEMA>;
 
-export const SUBJECTS_KEYS = ["chat_id", "storage_id", "group_id"] as const;
+export const SUBJECTS_KEYS = [
+  "chat_id",
+  "storage_id",
+  "group_id",
+  "template_id",
+] as const;
 
 export const SUBJECTS_KEYS_SCHEMA = z.enum(SUBJECTS_KEYS);
 
