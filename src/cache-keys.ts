@@ -7,10 +7,10 @@
  * 각 키 함수에 .ttl 프로퍼티로 TTL(초) 접근 가능. null은 TTL 없음 또는 가변.
  */
 
-function withTTL<TArgs extends any[]>(
+function withTTL<TArgs extends any[], TTL extends number | null>(
   fn: (...args: TArgs) => string,
-  ttl: number | null,
-): ((...args: TArgs) => string) & { ttl: number | null } {
+  ttl: TTL,
+): ((...args: TArgs) => string) & { ttl: TTL } {
   return Object.assign(fn, { ttl });
 }
 
