@@ -1,11 +1,10 @@
-import { CacheKeys, CacheTTL } from "./cache-keys";
+import { CacheKeys } from "./cache-keys";
 
 /**
  * CacheKeys에서 자동으로 타입 경로를 추출하는 헬퍼
  */
 export class CacheKeyHelper {
   static keys = CacheKeys;
-  static ttl = CacheTTL;
   /**
    * CacheKeys의 모든 경로를 추출
    * @returns ['space.detail', 'space.domain', 'space.host', ...]
@@ -53,12 +52,13 @@ export class CacheKeyHelper {
   }
 
   /**
-   * 캐시 키 패턴 생성
-   * @param category 'space', 'prompt' 등
-   * @returns Redis 패턴 문자열 (예: 'space:*')
+   * 서버 도메인 패턴 생성
+   * @param server 'back' | 'chat'
+   * @param category 'space', 'prompt' 등 (선택)
+   * @returns Redis 패턴 문자열 (예: 'back:*', 'back:space:*')
    */
-  static getCategoryPattern(category: string): string {
-    return `${category}:*`;
+  static getCategoryPattern(server: "back" | "chat", category?: string): string {
+    return category ? `${server}:${category}:*` : `${server}:*`;
   }
 
   /**
@@ -67,26 +67,37 @@ export class CacheKeyHelper {
    * @returns Redis 패턴 배열
    */
   static getIdPatterns(id: string): string[] {
-    return [`*:${id}`, `*:${id}:*`, `*:*:${id}`, `*:*:${id}:*`];
+    const servers = ["back", "chat"];
+    const depths = [
+      `*:${id}`,
+      `*:${id}:*`,
+      `*:*:${id}`,
+      `*:*:${id}:*`,
+      `*:*:*:${id}`,
+      `*:*:*:${id}:*`,
+    ];
+    return servers.flatMap((server) => depths.map((d) => `${server}:${d}`));
   }
 
   /**
    * 모든 카테고리 목록 반환
-   * @returns ['space', 'prompt', 'bookmark', 'lock', 'auth', 'audit']
+   * @param server 'back' | 'chat'
+   * @returns back: ['space', 'prompt', ...] / chat: ['priceConfig', 'exchangeRate', ...]
    */
-  static getAllCategories(): string[] {
-    return Object.keys(this.keys);
+  static getAllCategories(server: "back" | "chat"): string[] {
+    return Object.keys(this.keys[server]);
   }
 
   /**
    * 특정 카테고리의 모든 키 타입 반환
-   * @param category 'space', 'prompt' 등
+   * @param server 'back' | 'chat'
+   * @param category back: 'space' | 'prompt' 등 / chat: 'priceConfig' | 'exchangeRate' 등
    * @returns ['detail', 'domain', 'host', 'canCreate']
    */
-  static getCategoryKeyTypes(category: string): string[] {
-    const categoryObj = (this.keys as any)[category];
+  static getCategoryKeyTypes(server: "back" | "chat", category: string): string[] {
+    const categoryObj = (this.keys[server] as any)[category];
     if (!categoryObj) {
-      throw new Error(`Invalid category: ${category}`);
+      throw new Error(`Invalid category: ${server}.${category}`);
     }
     return Object.keys(categoryObj);
   }
