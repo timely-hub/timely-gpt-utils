@@ -1,13 +1,10 @@
 #!/bin/bash
 set -e
 
-TAG=$1
+VERSION=$(node -p "require('./package.json').version")
+TAG="v${VERSION}"
 
-if [ -z "$TAG" ]; then
-  echo "Usage: ./release.sh <tag>"
-  echo "Example: ./release.sh v0.0.5"
-  exit 1
-fi
+echo "Releasing $TAG from package.json..."
 
 # 기존 태그 삭제 (존재하는 경우)
 if git rev-parse "$TAG" >/dev/null 2>&1; then
