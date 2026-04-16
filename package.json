@@ -1,6 +1,6 @@
 {
   "name": "@timely-hub/timely-gpt-utils",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "scripts": {
@@ -11,7 +11,8 @@
     "dist"
   ],
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com",
+    "access": "public"
   },
   "devDependencies": {
     "@types/node": "^25.5.2",
