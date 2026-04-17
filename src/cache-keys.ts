@@ -22,18 +22,24 @@ function defineKey<TArgs extends any[], TTL extends number | null>(
 ): ((...args: TArgs) => string) & {
   ttl: TTL;
   pattern: (...args: OptionalTuple<TArgs>) => string;
-  invalidate: (redis: RedisClient, ...args: OptionalTuple<TArgs>) => Promise<void>;
+  invalidate: (
+    redis: RedisClient,
+    ...args: OptionalTuple<TArgs>
+  ) => Promise<void>;
 } {
   const pattern = (...args: any[]): string => {
     const length = Math.max(fn.length, args.length);
     const finalArgs = Array.from({ length }, (_, i) =>
-      args[i] === undefined ? '*' : args[i],
+      args[i] === undefined ? "*" : args[i],
     );
     return fn(...(finalArgs as unknown as TArgs));
   };
-  const invalidate = async (redis: RedisClient, ...args: any[]): Promise<void> => {
+  const invalidate = async (
+    redis: RedisClient,
+    ...args: any[]
+  ): Promise<void> => {
     const p = pattern(...args);
-    if (p.includes('*')) {
+    if (p.includes("*")) {
       const keys = await redis.keys(p);
       if (keys.length) await redis.del(...keys);
     } else {
@@ -50,7 +56,10 @@ export const CacheKeys = {
     space: {
       simpleList: defineKey(() => `back:space:simple_list`, 3600),
       detail: defineKey((id: string) => `back:space:detail:${id}`, 300),
-      domain: defineKey((domain: string) => `back:space:domain:${domain}`, null),
+      domain: defineKey(
+        (domain: string) => `back:space:domain:${domain}`,
+        null,
+      ),
       host: defineKey((host: string) => `back:space:host:${host}`, null),
       canCreate: defineKey(
         (userId: string) => `back:space:can_create:${userId}`,
@@ -107,6 +116,10 @@ export const CacheKeys = {
       ),
       details: defineKey(
         (spaceMemberId: string) => `back:space-member:details:${spaceMemberId}`,
+        600,
+      ),
+      usage: defineKey(
+        (spaceMemberId: string) => `back:space-member:usage:${spaceMemberId}`,
         600,
       ),
     },
