@@ -7,11 +7,40 @@
  * 각 키 함수에 .ttl 프로퍼티로 TTL(초) 접근 가능. null은 TTL 없음 또는 가변.
  */
 
-function withTTL<TArgs extends any[], TTL extends number | null>(
+type OptionalTuple<T extends unknown[]> = T extends [infer Head, ...infer Rest]
+  ? [Head?, ...OptionalTuple<Rest>]
+  : [];
+
+export interface RedisClient {
+  keys(pattern: string): Promise<string[]>;
+  del(...keys: string[]): Promise<any>;
+}
+
+function defineKey<TArgs extends any[], TTL extends number | null>(
   fn: (...args: TArgs) => string,
   ttl: TTL,
-): ((...args: TArgs) => string) & { ttl: TTL } {
-  return Object.assign(fn, { ttl });
+): ((...args: TArgs) => string) & {
+  ttl: TTL;
+  pattern: (...args: OptionalTuple<TArgs>) => string;
+  invalidate: (redis: RedisClient, ...args: OptionalTuple<TArgs>) => Promise<void>;
+} {
+  const pattern = (...args: any[]): string => {
+    const length = Math.max(fn.length, args.length);
+    const finalArgs = Array.from({ length }, (_, i) =>
+      args[i] === undefined ? '*' : args[i],
+    );
+    return fn(...(finalArgs as unknown as TArgs));
+  };
+  const invalidate = async (redis: RedisClient, ...args: any[]): Promise<void> => {
+    const p = pattern(...args);
+    if (p.includes('*')) {
+      const keys = await redis.keys(p);
+      if (keys.length) await redis.del(...keys);
+    } else {
+      await redis.del(p);
+    }
+  };
+  return Object.assign(fn, { ttl, pattern, invalidate });
 }
 
 export const CacheKeys = {
@@ -19,20 +48,20 @@ export const CacheKeys = {
   back: {
     // === Space 관련 ===
     space: {
-      simpleList: withTTL(() => `back:space:simple_list`, 3600),
-      detail: withTTL((id: string) => `back:space:detail:${id}`, 300),
-      domain: withTTL((domain: string) => `back:space:domain:${domain}`, null),
-      host: withTTL((host: string) => `back:space:host:${host}`, null),
-      canCreate: withTTL(
+      simpleList: defineKey(() => `back:space:simple_list`, 3600),
+      detail: defineKey((id: string) => `back:space:detail:${id}`, 300),
+      domain: defineKey((domain: string) => `back:space:domain:${domain}`, null),
+      host: defineKey((host: string) => `back:space:host:${host}`, null),
+      canCreate: defineKey(
         (userId: string) => `back:space:can_create:${userId}`,
         600,
       ),
-      lockUpdateAllSpaceMembersDefaultModel: withTTL(
+      lockUpdateAllSpaceMembersDefaultModel: defineKey(
         (id: string) =>
           `back:space:lock_update_all_space_members_default_model:${id}`,
         600,
       ),
-      lockToggleMemberNickname: withTTL(
+      lockToggleMemberNickname: defineKey(
         (id: string) => `back:space:lock_toggle_member_nickname:${id}`,
         300,
       ),
@@ -40,7 +69,7 @@ export const CacheKeys = {
 
     // === Prompt 관련 ===
     prompt: {
-      view: withTTL(
+      view: defineKey(
         (userId: string, promptId: string) =>
           `back:prompt_view:${userId}:${promptId}`,
         86400,
@@ -49,7 +78,7 @@ export const CacheKeys = {
 
     // === Bookmark 관련 ===
     bookmark: {
-      groupView: withTTL(
+      groupView: defineKey(
         (userId: string, bookmarkId: string) =>
           `back:space_group_bookmark_view:${userId}:${bookmarkId}`,
         86400,
@@ -58,12 +87,12 @@ export const CacheKeys = {
 
     // === Cron Lock ===
     lock: {
-      cron: withTTL((jobName: string) => `back:lock:cron:${jobName}`, 600),
+      cron: defineKey((jobName: string) => `back:lock:cron:${jobName}`, 600),
     },
 
     // === Auth 관련 ===
     auth: {
-      apiKey: withTTL(
+      apiKey: defineKey(
         (apiKey: string, spaceId: string) =>
           `back:auth:api_key:${spaceId}:${apiKey}`,
         900,
@@ -72,11 +101,11 @@ export const CacheKeys = {
 
     // === SpaceMember 관련 ===
     spaceMember: {
-      status: withTTL(
+      status: defineKey(
         (spaceMemberId: string) => `back:space-member:status:${spaceMemberId}`,
         120,
       ),
-      details: withTTL(
+      details: defineKey(
         (spaceMemberId: string) => `back:space-member:details:${spaceMemberId}`,
         600,
       ),
@@ -84,8 +113,8 @@ export const CacheKeys = {
 
     // === Audit 관련 ===
     audit: {
-      space: withTTL((spaceId: string) => `back:audit:space:${spaceId}`, 600),
-      user: withTTL(
+      space: defineKey((spaceId: string) => `back:audit:space:${spaceId}`, 600),
+      user: defineKey(
         (userId: string, spaceId?: string) =>
           spaceId
             ? `back:audit:user:${userId}:${spaceId}`
@@ -99,7 +128,7 @@ export const CacheKeys = {
   chat: {
     // auth.guard.ts - 스페이스별 가격 규정
     priceConfig: {
-      byType: withTTL(
+      byType: defineKey(
         (type: "USER" | "SPACE" | "GROUP" | "ORGANIZATION", id: string) =>
           `chat:price_config:${type}:${id}`,
         60,
@@ -107,30 +136,35 @@ export const CacheKeys = {
     },
     // exchange-rate.service.ts - 환율 정보
     exchangeRate: {
-      usdKrw: withTTL(() => `chat:exchange_rate:usd_krw`, 600),
+      usdKrw: defineKey(() => `chat:exchange_rate:usd_krw`, 600),
+    },
+    models: {
+      provider: defineKey(() => `chat:models:provider`, null),
+      metadata: defineKey(() => `chat:models:metadata`, null),
+      pricing: defineKey(() => `chat:models:pricing`, null),
     },
     // ai-model.service.ts - LLM 모델 정보 (TTL 없음)
     model: {
-      info: withTTL((target: string) => `chat:models:info:${target}`, null),
+      info: defineKey((target: string) => `chat:models:info:${target}`, null),
     },
     // memory-manager.service.ts - chat 세션 내 기억 메모리
     memory: {
-      session: withTTL(
+      session: defineKey(
         (chatId: string, keyname: string) => `chat:memory:${chatId}:${keyname}`,
         900,
       ),
     },
     // idempotency.service.ts - LLM streaming 요청 멱등성 키 (가변 TTL)
     idempotent: {
-      key: withTTL((key: string) => `chat:idempotent:${key}`, null),
+      key: defineKey((key: string) => `chat:idempotent:${key}`, null),
     },
     // connector.service.ts (주석처리) - MCP 툴 정보 (TTL 없음)
     connector: {
-      authConfigs: withTTL(() => `chat:connector:auth_configs`, null),
+      authConfigs: defineKey(() => `chat:connector:auth_configs`, null),
     },
     // month-aggregator.scheduler.ts - 집계 동작 중 lock (TTL 없음)
     monthAggregator: {
-      lock: withTTL(
+      lock: defineKey(
         (lockName: string) => `chat:month-aggregator:${lockName}`,
         null,
       ),

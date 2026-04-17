@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PATH_TYPES_SCHEMA = exports.PATH_TYPES = exports.VERIFIED_USER_SCHEMA = exports.DECODED_PAYLOAD_SCHEMA = exports.FILE_SERVICE_REQUEST_SCHEMA = exports.SUBJECT_KEY_PREFIX_REGEX = exports.FILE_NAME_DELIMETER = exports.DIRECTORY_DELIMETER = exports.prefixMap = exports.TARGET_SCHEMA = exports.FILE_INFO_SCHEMA = exports.FILE_CATEGORIES_SCHEMA = exports.FILE_CATEGORIES = exports.CONTAINERS_SCHEMA = exports.CONTAINERS = void 0;
+exports.PATH_TYPES_SCHEMA = exports.PATH_TYPES = exports.VERIFIED_USER_SCHEMA = exports.DECODED_PAYLOAD_SCHEMA = exports.FILE_SERVICE_REQUEST_SCHEMA = exports.SUBJECT_KEY_PREFIX_REGEX = exports.FILE_NAME_DELIMETER = exports.DIRECTORY_DELIMETER = exports.prefixMap = exports.TARGET_SCHEMA = exports.SUBJECTS_KEYS_SCHEMA = exports.SUBJECTS_KEYS = exports.FILE_INFO_SCHEMA = exports.FILE_CATEGORIES_SCHEMA = exports.FILE_CATEGORIES = exports.CONTAINERS_SCHEMA = exports.CONTAINERS = void 0;
 const zod_1 = __importDefault(require("zod"));
 exports.CONTAINERS = ["protected", "public", "temp"];
 exports.CONTAINERS_SCHEMA = zod_1.default.enum(exports.CONTAINERS);
@@ -25,8 +25,15 @@ exports.FILE_INFO_SCHEMA = zod_1.default.object({
     originalName: zod_1.default.string().nullable().optional(),
     category: exports.FILE_CATEGORIES_SCHEMA,
 });
+exports.SUBJECTS_KEYS = [
+    "chat_id",
+    "storage_id",
+    "group_id",
+    "template_id",
+];
+exports.SUBJECTS_KEYS_SCHEMA = zod_1.default.enum(exports.SUBJECTS_KEYS);
 const SUBJECT_SCHEMA = zod_1.default
-    .array(zod_1.default.tuple([zod_1.default.string(), zod_1.default.string()]))
+    .array(zod_1.default.tuple([exports.SUBJECTS_KEYS_SCHEMA, zod_1.default.string()]))
     .transform((arr) => arr);
 exports.TARGET_SCHEMA = zod_1.default.object({
     orgScope: zod_1.default.string().describe("1 - 조직 범위"),

@@ -34,11 +34,24 @@ export declare const FILE_INFO_SCHEMA: z.ZodObject<{
     }>;
 }, z.core.$strip>;
 export type FileInfo = z.infer<typeof FILE_INFO_SCHEMA>;
+export declare const SUBJECTS_KEYS: readonly ["chat_id", "storage_id", "group_id", "template_id"];
+export declare const SUBJECTS_KEYS_SCHEMA: z.ZodEnum<{
+    chat_id: "chat_id";
+    storage_id: "storage_id";
+    group_id: "group_id";
+    template_id: "template_id";
+}>;
+export type SubjectsKeysType = z.infer<typeof SUBJECTS_KEYS_SCHEMA>;
 export declare const TARGET_SCHEMA: z.ZodObject<{
     orgScope: z.ZodString;
     spaceId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     userId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    subjects: z.ZodOptional<z.ZodNullable<z.ZodPipe<z.ZodArray<z.ZodTuple<[z.ZodString, z.ZodString], null>>, z.ZodTransform<[string, string][], [string, string][]>>>>;
+    subjects: z.ZodOptional<z.ZodNullable<z.ZodPipe<z.ZodArray<z.ZodTuple<[z.ZodEnum<{
+        chat_id: "chat_id";
+        storage_id: "storage_id";
+        group_id: "group_id";
+        template_id: "template_id";
+    }>, z.ZodString], null>>, z.ZodTransform<["chat_id" | "storage_id" | "group_id" | "template_id", string][], ["chat_id" | "storage_id" | "group_id" | "template_id", string][]>>>>;
     spaceMemberId: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     purpose: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
@@ -77,7 +90,12 @@ export declare const FILE_SERVICE_REQUEST_SCHEMA: z.ZodObject<{
         }>;
     }, z.core.$strip>;
     filePath: z.ZodString;
-    subjects: z.ZodPipe<z.ZodArray<z.ZodTuple<[z.ZodString, z.ZodString], null>>, z.ZodTransform<[string, string][], [string, string][]>>;
+    subjects: z.ZodPipe<z.ZodArray<z.ZodTuple<[z.ZodEnum<{
+        chat_id: "chat_id";
+        storage_id: "storage_id";
+        group_id: "group_id";
+        template_id: "template_id";
+    }>, z.ZodString], null>>, z.ZodTransform<["chat_id" | "storage_id" | "group_id" | "template_id", string][], ["chat_id" | "storage_id" | "group_id" | "template_id", string][]>>;
     purpose: z.ZodString;
 }, z.core.$strip>;
 export type FileServiceRequest = z.infer<typeof FILE_SERVICE_REQUEST_SCHEMA>;

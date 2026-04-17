@@ -40,4 +40,5 @@ exports.filePathUtils = void 0;
 exports.filePathUtils = __importStar(require("./file-path-utils"));
 __exportStar(require("./types"), exports);
 __exportStar(require("./file-classifier"), exports);
+__exportStar(require("./cache-key-helper"), exports);
 //# sourceMappingURL=index.js.map

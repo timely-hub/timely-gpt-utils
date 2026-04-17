@@ -1,4 +1,4 @@
-import { VerifiedUser, ContainerType, TargetType, PathType, FileServiceRequest, FileCategoryType } from "./types";
+import { VerifiedUser, ContainerType, TargetType, PathType, FileServiceRequest, FileCategoryType, SubjectsKeysType } from "./types";
 export declare const convertToken: (token: string) => VerifiedUser;
 /**
  * metaData를 이용하여 특정 파일 경로를 반환함.
@@ -26,7 +26,7 @@ export declare const buildUploadInfo: ({ file, token, pathType, container, subje
     token: string;
     pathType: PathType;
     container?: "protected" | "public" | "temp";
-    subjects?: [string, string][];
+    subjects?: [SubjectsKeysType, string][];
     purpose?: string;
 }) => FileServiceRequest;
 export declare const getAllSubjectsFromTarget: (target: TargetType) => Record<string, string>;
