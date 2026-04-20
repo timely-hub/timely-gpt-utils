@@ -388,7 +388,7 @@ export const parseFileUnknownPath = (
   if (unknownPath.startsWith("file-server:")) {
     unknownPath = unknownPath.split("file-server:")[1];
     if (unknownPath.startsWith("p_")) {
-      fileName = unknownPath.split("p_")[1];
+      fileName = "p_" + unknownPath.split("p_")[1];
     } else {
       id = unknownPath;
     }
