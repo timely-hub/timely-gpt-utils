@@ -31,6 +31,7 @@ export const SUBJECTS_KEYS = [
   "storage_id",
   "group_id",
   "template_id",
+  "chat_project_id",
 ] as const;
 
 export const SUBJECTS_KEYS_SCHEMA = z.enum(SUBJECTS_KEYS);
